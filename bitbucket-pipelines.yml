@@ -1,0 +1,10 @@
+image: google/cloud-sdk
+
+pipelines:
+  default:
+    - step:
+        script:
+          - echo ${GOOGLE_SERVICE_ACC_KEY} > client-secret.json
+          - gcloud auth activate-service-account --key-file=client-secret.json
+          - gsutil -m rsync -dr site gs://tradeoffgames.naturalcapitalproject.org
+          - gsutil -m setmeta -h "Cache-Control:public,max-age=0" gs://tradeoffgames.naturalcapitalproject.org/**/*
