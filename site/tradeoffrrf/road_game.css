@@ -1,0 +1,109 @@
+table.inputs {
+    border-collapse: collapse;
+    display: inline-block;
+    vertical-align:top;
+    padding:20px;
+}
+table.outputs input {
+    width:100px;
+}
+
+input {
+    text-align:right;
+    padding-right:5px;
+}
+
+div.inputs {
+    display: inline-block;
+    vertical-align:top;
+    padding:20px;
+}
+
+h4.header-style{
+    background-color:LightGrey;
+}
+
+table.outputs {
+    display:inline-block;
+}
+
+td {
+    text-align:right;
+}
+td.operation {
+    font-weight:bold;
+    font-size:24px;
+}
+.hide {
+    visibility:hidden;
+}
+input.total {
+    font-size:26px;
+}
+
+th {
+    padding: 10px;
+}
+th.blue {
+    color:blue;
+}
+th.red {
+    color:red;
+}
+th.unbold{
+    font-weight:normal;
+}
+
+#outputs td, #outputs th {
+    text-align:center;
+}
+
+caption {
+    white-space:nowrap;
+}
+
+.checkboxgroup{
+    display:inline-block;
+    text-align:center;
+    padding-right:10px;
+}
+
+label {
+    display:block;
+}
+
+h1 {
+    text-align:center;
+}
+
+h3 {
+    text-align:center;
+}
+
+.header-style {
+    padding-right: 4px;
+    padding-left: 4px;
+}
+
+.button-green {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.button-grey {
+    background-color: #b4b4b4; /* Gray */
+    border: none;
+    color: black;
+    padding: 10px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-right:10px;
+}

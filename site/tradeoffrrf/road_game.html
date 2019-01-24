@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="carbon_points.js"> </script>
+    <script src="cost_points.js"> </script>
+    <script src="erosion_points.js"> </script>
+    <script src="sed_retention_points.js"> </script>
+    <script src="habitat_quality_points.js"> </script>
+    <script src="road_game_parameters_roads.js"></script>
+    <script src="road_game.js"></script>
+    <link rel="stylesheet" href="road_game.css">
+
+    <title>NatCap Game</title>
+</head>
+
+<body>
+
+    <h1>Tradeoff! Infrastructure Edition</h1>
+    <h3>Scoring Calculator<h3>
+
+    <div id="calculator">
+
+        <div id="checkboxes" class="inputs">
+            <h4 class="header-style"> Road Route<br />Selected </h4>
+            <div class="checkboxgroup">
+                <input type="radio" name="road_route" id="road_A" value="A" onclick="displayBenefit()"/>
+                <label for="road_A">A</label>
+            </div>
+            <div class="checkboxgroup">
+                <input type="radio" name="road_route" id="road_B" value="B" onclick="displayBenefit()"/>
+                <label for="road_B">B</label>
+            </div>
+            <div class="checkboxgroup">
+                <input type="radio" name="road_route" id="road_C" value="C" onclick="displayBenefit()"/>
+                <label for="road_C">C</label>
+            </div>
+            <div class="checkboxgroup">
+                <input type="radio" name="road_route" id="road_D" value="D" onclick="displayBenefit()"/>
+                <label for="road_D">D</label>
+            </div>
+            <div class="checkboxgroup">
+                <input type="radio" name="road_route" id="road_E" value="E" onclick="displayBenefit()"/>
+                <label for="road_E">E</label>
+            </div>
+        </div>
+
+
+        <table id="wildlife_crossings" class="inputs">
+            <caption ><center><h4 class="header-style">Wildlife Crossing<br />Locations</h4></center></caption>
+
+            <tr>
+                <td> </td><td><center>Row</center></td><td><center>Col</center></td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td><input type="text" name="y" value="" size=2 ></td>
+                <td><input type="text" name="x" value="" size=2 ></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><input type="text" name="y" value="" size=2 ></td>
+                <td><input type="text" name="x" value="" size=2 ></td>
+            </tr>
+        </table>
+
+        <table id="conservation_blocks" class="inputs">
+            <caption><center><h4 class="header-style">Conservation Block<br />Locations</h4></center></caption>
+
+            <tr>
+                <td> </td><td><center>Row</center></td><td><center>Col</center></td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td><input type="text" name="y" value="" size=2 ></td>
+                <td><input type="text" name="x" value="" size=2 ></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><input type="text" name="y" value="" size=2 ></td>
+                <td><input type="text" name="x" value="" size=2 ></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><input type="text" name="y" value="" size=2 ></td>
+                <td><input type="text" name="x" value="" size=2 ></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><input type="text" name="y" value="" size=2 ></td>
+                <td><input type="text" name="x" value="" size=2 ></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><input type="text" name="y" value="" size=2 ></td>
+                <td><input type="text" name="x" value="" size=2 ></td>
+            </tr>
+        </table>
+
+        <br />
+
+        <table id="outputs" class="outputs">
+            <tr>
+                <th class="blue">Road development<br />benefits</th><th></th> <!-- Where minus will go -->
+                <th class="red">Road construction<br />costs</th><th></th> <!-- Where minus will go -->
+                <th class="red">Wildlife crossing<br />costs</th><th></th> <!-- Where minus will go -->
+                <th class="red">Conservation block<br />costs</th><th></th> <!-- Where minus will go -->
+                <th class="red">Total environmental<br />losses</th><th></th> <!-- Where equals will go -->
+                <th> TOTAL </th>
+            </tr>
+            <tr>
+                <td><input disabled type="text" id="road_dev_ben"></td><td class="operation">-</td>
+                <td><input disabled type="text" id="road_cons_cost"></td><td class="operation">-</td>
+                <td><input disabled type="text" id="wild_cross_cost"></td><td class="operation">-</td>
+                <td><input disabled type="text" id="cons_block_cost"></td><td class="operation">-</td>
+                <td><input disabled type="text" id="total_env_losses"></td><td class="operation">=</td>
+                <td><input class="total" disabled type="text" id="total"></td>
+            </tr>
+            <tr>
+                <th></th><th></th><th></th><th></th> <!-- burn 4 column spots for alignment -->
+                <th class="blue unbold">Wildlife crossing<br />benefits</th><th></th> <!-- leave blank spot for alignment -->
+                <th class="blue unbold">Conservation block<br />benefits</th><th></th> <!-- leave blank spot for alignment -->
+                <th class="red unbold">Water quality<br />loss</th>
+            </tr>
+            <tr>
+                <td></td><td></td><td></td><td></td><!-- burn 4 column spots for alignment -->
+                <td><input disabled type="text" id="wild_cross_ben"></td><td></td>
+                <td><input disabled type="text" id="cons_block_ben"></td><td></td>
+                <td><input disabled type="text" id="water_qual_loss"></td>
+            </tr>
+            <tr>
+                <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th> <!-- burn 8 column spots for alignment -->
+                <th class="red unbold">Erosion control<br />loss</th>
+            </tr>
+            <tr>
+                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td> <!-- burn 8 column spots for alignment -->
+
+                <td><input disabled type="text" id="eros_cont_loss"></td>
+            </tr>
+            <tr>
+                <td colspan="4" rowspan="2">
+                    <button class="button-grey" onclick="clearText()">Clear</button>
+                    <button class="button-grey" onclick="example()">Example</button>
+                    <button class="button-green" onclick="calculate()">Calculate</button></td>
+
+                <th></th><th></th><th></th><th></th> <!-- burn 8 column spots for alignment -->
+                <th class="red unbold">Habitat loss</th>
+            </tr>
+            <tr>
+                <td></td><td></td><td></td><td></td> <!-- burn 8 column spots for alignment -->
+                <td><input disabled type="text" id="habitat_loss"></td>
+            </tr>
+            <tr>
+                <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th> <!-- burn 8 column spots for alignment -->
+                <th class="red unbold hide">Carbon cost</th> <!-- leave blank spot for alignment -->
+            </tr>
+            <tr>
+                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td> <!-- burn 8 column spots for alignment -->
+
+                <td class="hide"><input disabled type="text" id="carbon_cost"></td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>
