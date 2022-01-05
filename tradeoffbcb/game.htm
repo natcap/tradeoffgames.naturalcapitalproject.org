@@ -659,16 +659,15 @@ function runtests(){
     console.log('Running tests');
 
     console.log('Testing clean function');
-    $('input[type=text]').each(function(){
-        $(this).value = "1";  // set a value; doesn't matter what
+    $('input:text').each(function(){
+        $(this).val("1");  // set a value; doesn't matter what
     });
 
-    //clean();
+    clean();
 
-    $('input[type=text]').each(function(){
+    $('input:text').each(function(){
         if ($(this).val() != "") {
-            console.log($(this));
-            console.log($(this).attr('name') + 'should be blank');
+            console.log($(this).attr('name') + ' should be blank but is not.');
         }
     });
 
