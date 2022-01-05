@@ -608,48 +608,12 @@ document.calculator.protectedY5.style.background="#FFFFFF";
 }
 
 function clean(){
+    white();
 
-white();
-
-document.calculator.hotelX1.value="";
-document.calculator.hotelY1.value="";
-document.calculator.hotelX2.value="";
-document.calculator.hotelY2.value="";
-document.calculator.hotelX3.value="";
-document.calculator.hotelY3.value="";
-
-document.calculator.campX1.value="";
-document.calculator.campY1.value="";
-document.calculator.campX2.value="";
-document.calculator.campY2.value="";
-document.calculator.campX3.value="";
-document.calculator.campY3.value="";
-document.calculator.campX4.value="";
-document.calculator.campY4.value="";
-document.calculator.campX5.value="";
-document.calculator.campY5.value="";
-
-document.calculator.protectedX1.value="";
-document.calculator.protectedY1.value="";
-document.calculator.protectedX2.value="";
-document.calculator.protectedY2.value="";
-document.calculator.protectedX3.value="";
-document.calculator.protectedY3.value="";
-document.calculator.protectedX4.value="";
-document.calculator.protectedY4.value="";
-document.calculator.protectedX5.value="";
-document.calculator.protectedY5.value="";
-
-document.calculator.cv.value="";
-document.calculator.fish.value="";
-document.calculator.tour.value="";
-document.calculator.gain.value="";
-document.calculator.coral.value="";
-document.calculator.groves.value="";
-document.calculator.grass.value="";
-document.calculator.loss.value="";
-document.calculator.score.value="";
-
+    // Clear the text value for all text-based inputs in the DOM.
+    $('input[type=text]').each(function(){
+        $(this).val("");
+    });
 }
 
 </script>
