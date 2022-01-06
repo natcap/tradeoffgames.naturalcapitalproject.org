@@ -78,8 +78,8 @@ var data = [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]
 var visited = [];
 var fished = [];
 for (n=0; n<pa.length; n++){
-visited.push([pa[n][0],pa[n][1]]);
-fished.push([pa[n][0],pa[n][1]]);
+    visited.push([pa[n][0],pa[n][1]]);
+    fished.push([pa[n][0],pa[n][1]]);
 }
 
 
@@ -113,8 +113,7 @@ fished.push([pa[n][0],pa[n][1]]);
     var neighbors = [];
 
 
-    for (i=0; i<hotels.length; i++)
-    {
+    for (i=0; i<hotels.length; i++){
         x = hotels[i][0];
         y = hotels[i][1];
 
@@ -125,18 +124,15 @@ fished.push([pa[n][0],pa[n][1]]);
         grass = data[hotels[i][0]][hotels[i][1]][4];
 
         visit = true;
-        for (v=0; v<visited.length; v++)
-        {
-             if ((x == visited[v][0]) && (y == visited[v][1]))
-             {
+        for (v=0; v<visited.length; v++){
+             if ((x == visited[v][0]) && (y == visited[v][1])){
                   visit = false;
                   break;
              }
         }
 
 
-        if (visit)
-        {
+        if (visit){
              tourTotal = tourTotal + tour;
              fish = fishTotal + fish;
              coralTotal = coralTotal + coral;
@@ -148,21 +144,16 @@ fished.push([pa[n][0],pa[n][1]]);
 
 
         neighbors = findneighbors(x,y,xDim,yDim);
-        for (j=0; j<neighbors.length; j++)
-        {
-
+        for (j=0; j<neighbors.length; j++){
             visit = true;
-            for (v=0; v<visited.length; v++)
-            {
-                 if ((neighbors[j][0] == visited[v][0]) && (neighbors[j][1] == visited[v][1]))
-                 {
+            for (v=0; v<visited.length; v++){
+                 if ((neighbors[j][0] == visited[v][0]) && (neighbors[j][1] == visited[v][1])){
                       visit = false;
                       break;
                  }
             }
 
-            if (visit)
-            {
+            if (visit){
                  tourTotal = tourTotal + data[neighbors[j][0]][neighbors[j][1]][0];
                  coralTotal = coralTotal + data[neighbors[j][0]][neighbors[j][1]][2];
                  grovesTotal = grovesTotal + data[neighbors[j][0]][neighbors[j][1]][3];
@@ -174,47 +165,35 @@ fished.push([pa[n][0],pa[n][1]]);
             coral = coral + data[neighbors[j][0]][neighbors[j][1]][2];
             groves = groves + data[neighbors[j][0]][neighbors[j][1]][3];
             grass = grass + data[neighbors[j][0]][neighbors[j][1]][4];
-
-
         }
-
     }
 
-    for (i=0; i<camps.length; i++)
-    {
-
+    for (i=0; i<camps.length; i++){
         visit = true;
-        for (v=0; v<visited.length; v++)
-        {
-             if ((camps[i][0] == visited[v][0]) && (camps[i][1] == visited[v][1]))
-             {
+        for (v=0; v<visited.length; v++){
+             if ((camps[i][0] == visited[v][0]) && (camps[i][1] == visited[v][1])){
                   visit = false;
                   break;
              }
         }
 
-        if (visit)
-        {
+        if (visit){
              fishTotal = fishTotal + data[camps[i][0]][camps[i][1]][1];
              coralTotal = coralTotal + data[camps[i][0]][camps[i][1]][2];
              grovesTotal = grovesTotal + data[camps[i][0]][camps[i][1]][3];
              grassTotal = grassTotal + data[camps[i][0]][camps[i][1]][4];
              visited.push(camps[i]);
         }
-        else
-        {
+        else {
             fishing = true;
-            for (f=0; f<fished.length; f++)
-            {
-                 if ((camps[i][0] == fished[f][0]) && (camps[i][1] == fished[f][1]))
-                 {
+            for (f=0; f<fished.length; f++) {
+                 if ((camps[i][0] == fished[f][0]) && (camps[i][1] == fished[f][1])){
                       fishing = false;
                       break;
                  }
             }
 
-            if (fishing)
-            {
+            if (fishing){
                  fishTotal = fishTotal + data[camps[i][0]][camps[i][1]][1];
                  fished.push(camps[i]);
             }
@@ -228,40 +207,32 @@ fished.push([pa[n][0],pa[n][1]]);
         grass = data[camps[i][0]][camps[i][1]][4];
 
         neighbors = findneighbors(camps[i][0],camps[i][1],xDim,yDim);
-        for (j=0; j<neighbors.length; j++)
-        {
+        for (j=0; j<neighbors.length; j++){
             visit = true;
-            for (v=0; v<visited.length; v++)
-            {
-                 if ((neighbors[j][0] == visited[v][0]) && (neighbors[j][1] == visited[v][1]))
-                 {
+            for (v=0; v<visited.length; v++){
+                 if ((neighbors[j][0] == visited[v][0]) && (neighbors[j][1] == visited[v][1])){
                       visit = false;
                       //break;
                  }
             }
 
-            if (visit)
-            {
+            if (visit){
                  fishTotal = fishTotal + data[neighbors[j][0]][neighbors[j][1]][1];
                  coralTotal = coralTotal + data[neighbors[j][0]][neighbors[j][1]][2];
                  grovesTotal = grovesTotal + data[neighbors[j][0]][neighbors[j][1]][3];
                  grassTotal = grassTotal + data[neighbors[j][0]][neighbors[j][1]][4];
                  visited.push(neighbors[j]);
             }
-            else
-            {
+            else{
                 fishing = true;
-                for (f=0; f<fished.length; f++)
-                {
-                     if ((neighbors[j][0] == fished[f][0]) && (neighbors[j][1] == fished[f][1]))
-                     {
+                for (f=0; f<fished.length; f++){
+                     if ((neighbors[j][0] == fished[f][0]) && (neighbors[j][1] == fished[f][1])){
                           fishing = false;
                           //break;
                      }
                 }
 
-                if (fishing)
-                {
+                if (fishing){
                      fishTotal = fishTotal + data[neighbors[j][0]][neighbors[j][1]][1];
                      fished.push(neighbors[j]);
                 }
@@ -283,19 +254,16 @@ fished.push([pa[n][0],pa[n][1]]);
 
     var degraded = [];
     var degrade = false;
-    for (n=0; n<hotels.length; n++)
-    {
+    for (n=0; n<hotels.length; n++){
         degraded.push.apply(degraded,findneighbors(hotels[n][0],hotels[n][1],xDim,yDim));
     }
     degraded.push.apply(degraded,hotels);
-    for (n=0; n<camps.length; n++)
-    {
+    for (n=0; n<camps.length; n++){
         degraded.push.apply(degraded,findneighbors(camps[n][0],camps[n][1],xDim,yDim));
     }
     degraded.push.apply(degraded,camps);
 
-    for (n=0; (n<coast.length); n++)
-    {
+    for (n=0; (n<coast.length); n++){
         cv1 = 0;
         cv2 = 0;
         neighbors = findneighbors(coast[n][0],coast[n][1],xDim,yDim);
@@ -306,13 +274,10 @@ fished.push([pa[n][0],pa[n][1]]);
 
         for (j=0; j<neighbors.length; j++){
             degrade = false;
-            for (d=0; !(degrade) && (d<degraded.length); d++)
-            {
-                if ((degraded[d][0] == neighbors[j][0]) && (degraded[d][1] == neighbors[j][1]))
-                {
+            for (d=0; !(degrade) && (d<degraded.length); d++){
+                if ((degraded[d][0] == neighbors[j][0]) && (degraded[d][1] == neighbors[j][1])){
                     degrade = true;
-                    for (p=0; p<pa.length; p++)
-                    {
+                    for (p=0; p<pa.length; p++){
                         if ((degraded[d][0] == pa[p][0]) && (degraded[d][1] == pa[p][1])){
                             degrade = false;
                         }
@@ -354,7 +319,6 @@ fished.push([pa[n][0],pa[n][1]]);
         }
 
         totalImpact = totalImpact + impact;
-
     }
 
 document.calculator.cv.value=Math.round(totalImpact);
