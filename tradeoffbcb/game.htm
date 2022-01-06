@@ -9,15 +9,6 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script language="javascript" type="text/javascript">
-// Parse a coordinate pair given a name and number.
-// example: if name=hotel, index=1, then hotelX1 and hotelY1 will be parsed.
-function parse_coordinate_pair(name, index){
-    if ($('input[name=color]').prop('checked') === true){
-        $(`input[name^=${name}][name$=${index}]`).each(function(){
-            $(this).css('background-color', '#00FF00');
-        });
-    }
-}
 
 // dev_type MUST be BOTH the name prefix AND the table ID containing the x/y coord pairs of the development type.
 // The objective of this function is to return a list of valid x/y coordinate pairs, even if some cells are empty.
