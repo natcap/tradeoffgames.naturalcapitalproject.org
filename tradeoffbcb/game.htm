@@ -19,8 +19,8 @@ function parse_coordinate_pair(name, index){
     }
 }
 
-// TODO: only load values if they're not NAN
-// TODO: lad each table (hotel, camp, protected) to pass to the score function
+// dev_type MUST be BOTH the name prefix AND the table ID containing the x/y coord pairs of the development type.
+// The objective of this function is to return a list of valid x/y coordinate pairs, even if some cells are empty.
 function parse_development_type(dev_type){
     var coord_pairs = [];
 
@@ -30,8 +30,14 @@ function parse_development_type(dev_type){
         x_elem = $(`input[name=${dev_type}X${i}]`);
         y_elem = $(`input[name=${dev_type}Y${i}]`);
 
-        coord_pairs.push([parseInt(x_elem.val()), parseInt(y_elem.val())]);
+        x_coord = parseInt(x_elem.val());
+        y_coord = parseInt(y_elem.val());
 
+        if (!isNaN(x_coord) && !isNaN(y_coord)){
+            coord_pairs.push([x_coord, y_coord]);
+        }
+
+        // only colorize the background if we're colorizing everything
         if ($('input[name=color]').prop('checked') === true){
             x_elem.css('background-color', '#00FF00');
             y_elem.css('background-color', '#00FF00');
@@ -193,7 +199,9 @@ if (!isNaN(x) && !isNaN(y)){
     }
 }
 
-
+//var hotels = parse_development_type('hotel');
+//var camps = parse_development_type('camp');
+//var pa = parse_development_type('protected');
 
 score(hotels,camps,pa)
 }
@@ -658,6 +666,38 @@ function runtests(){
     document.calculator.campY3.style.background = "#FFFFFF";
     document.calculator.grass.style.background = "#FFFFFF";
 
+    console.log('Testing coordinate pair extraction');
+    var test_data = {
+        'hotelX1': 1,
+        'hotelY1': '',  // deliberately blank; both X1, Y1 should be skipped
+        //deliberately excluding hotelX2, Y2.
+        'hotelX3': 4,
+        'hotelY3': 5,
+        'campX4': 6,
+        'campY4': 7,
+        'protectedX4': 4,
+        'protectedY4': 5,
+    }
+    for (const [key, value] of Object.entries(test_data)){
+        $(`input[name=${key}]`).val(value);
+    }
+    var hotels = parse_development_type('hotel')
+    var expected_hotels = [[4,5]]
+    if (JSON.stringify(hotels) != JSON.stringify(expected_hotels)){
+        console.log('Hotel output does not match');
+    }
+
+    var camps = parse_development_type('camp')
+    var expected_camps = [[6,7]]
+    if (JSON.stringify(camps) != JSON.stringify(expected_camps)){
+        console.log('Camps output does not match');
+    }
+
+    var protected_areas = parse_development_type('protected')
+    var expected_pa = [[4,5]]
+    if (JSON.stringify(protected_areas) != JSON.stringify(expected_pa)){
+        console.log('PA output does not match');
+    }
 
 }
 </script>
