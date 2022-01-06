@@ -577,34 +577,11 @@ document.calculator.score.value="";
 }
 
 function white(){
-document.calculator.hotelX1.style.background="#FFFFFF";
-document.calculator.hotelY1.style.background="#FFFFFF";
-document.calculator.hotelX2.style.background="#FFFFFF";
-document.calculator.hotelY2.style.background="#FFFFFF";
-document.calculator.hotelX3.style.background="#FFFFFF";
-document.calculator.hotelY3.style.background="#FFFFFF";
-
-document.calculator.campX1.style.background="#FFFFFF";
-document.calculator.campY1.style.background="#FFFFFF";
-document.calculator.campX2.style.background="#FFFFFF";
-document.calculator.campY2.style.background="#FFFFFF";
-document.calculator.campX3.style.background="#FFFFFF";
-document.calculator.campY3.style.background="#FFFFFF";
-document.calculator.campX4.style.background="#FFFFFF";
-document.calculator.campY4.style.background="#FFFFFF";
-document.calculator.campX5.style.background="#FFFFFF";
-document.calculator.campY5.style.background="#FFFFFF";
-
-document.calculator.protectedX1.style.background="#FFFFFF";
-document.calculator.protectedY1.style.background="#FFFFFF";
-document.calculator.protectedX2.style.background="#FFFFFF";
-document.calculator.protectedY2.style.background="#FFFFFF";
-document.calculator.protectedX3.style.background="#FFFFFF";
-document.calculator.protectedY3.style.background="#FFFFFF";
-document.calculator.protectedX4.style.background="#FFFFFF";
-document.calculator.protectedY4.style.background="#FFFFFF";
-document.calculator.protectedX5.style.background="#FFFFFF";
-document.calculator.protectedY5.style.background="#FFFFFF";
+    // We only want to set the background color on the top part of the table,
+    // the one that the user provides the coordinate pairs.
+    $('table#user-input input').each(function(){
+        $(this).css('background-color', '#FFFFFF');
+    });
 }
 
 function clean(){
@@ -626,14 +603,28 @@ function runtests(){
     $('input:text').each(function(){
         $(this).val("1");  // set a value; doesn't matter what
     });
-
     clean();
-
     $('input:text').each(function(){
         if ($(this).val() != "") {
             console.log($(this).attr('name') + ' should be blank but is not.');
         }
     });
+
+    console.log('Testing white() function');
+    document.calculator.campY3.style.background = "#000000";  // Should be set to white
+    document.calculator.grass.style.background = "#000000";  // Should stay black
+    white();
+    if ($('input[name=campY3]').css('background-color') != 'rgb(255, 255, 255)'){
+        console.log('CampY3 background not reset correctly');
+    }
+    if ($('input[name=grass]').css('background-color') != 'rgb(0, 0, 0)'){
+        console.log(document.calculator.grass.style.background);
+        console.log("Grass background color changed when it shouldn't have");
+    }
+    // reset the colors to base state.
+    document.calculator.campY3.style.background = "#FFFFFF";
+    document.calculator.grass.style.background = "#FFFFFF";
+
 
 }
 </script>
@@ -646,7 +637,7 @@ function runtests(){
 <form name="calculator">
 <table>
 <tr><td>
-    <table>
+    <table id='user-input'>
     <tr><td><center>Hotels</center></td><td><center>Fish Camps</center></td><td><center>Protected Areas</center></td></tr>
 
     <tr><td valign=top>
