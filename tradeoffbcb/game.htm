@@ -56,8 +56,30 @@ function getinput(){
 }
 
 
-function findneighbors(x,y,xDim,yDim)
+function findneighbors(x, y, xDim, yDim)
 {
+    // Neighbors are assumed to have the following order:
+    //
+    // 3 2 1
+    // 4 x 0
+    // 5 6 7
+    // TODO: verify that I have the correct coordinates here given the gameboard
+    var neighbor_offsets_x = [1, 1, 0, -1, -1, -1, 0, 1];
+    var neighbor_offsets_y = [0, 1, 1, 1, 0, -1, -1, -1];
+
+    var neighbors = [];
+    for (var neighbor=0; neighbor<8; neighbor++){
+        var neighbor_x = x + neighbor_offsets_x[neighbor];
+        var neighbor_y = y + neighbor_offsets_y[neighbor];
+
+        // Only push the neighbor coordinate pair if it's within bounds.
+        if ((neighbor_x >= 0 && neighbor_x < xDim) &&
+            (neighbor_y >= 0 && neighbor_y < yDim)){
+            neighbors.push([neighbor_x, neighbor_y]);
+        }
+    }
+    return neighbors;
+
 
     var maxColIndex = xDim-1;
     var maxRowIndex = yDim-1;
@@ -549,8 +571,34 @@ function runtests(){
         console.log('PA output does not match');
     }
 
-    console.log('Testing score');
+    console.log('Testing neighbors');
     clean();
+
+    // Let's assume that we're on a 10 x 10 grid.
+    // Coordinate pair order is (x, y)
+    // NOTE that for this program, the order of the neighbors doesn't matter, just that the coordinate pairs match.
+    var coords_and_expected_neighbors = [
+        [[0, 0], [[0, 1], [1, 1], [1, 0]]],
+        [[0, 9], [[0, 8], [1, 8], [1, 9]]],
+        [[0, 4], [[0, 3], [1, 3], [1, 4], [1, 5], [0, 5]]],
+        [[9, 0], [[8, 0], [8, 1], [9, 1]]],
+        [[9, 9], [[8, 9], [8, 8], [9, 8]]],
+        [[9, 4], [[9, 3], [8, 3], [8, 4], [8, 5], [9, 5]]],
+        [[4, 0], [[3, 0], [3, 1], [4, 1], [5, 1], [5, 0]]],
+        [[4, 9], [[3, 9], [3, 8], [4, 8], [5, 8], [5, 9]]],
+        [[4, 4], [[3, 4], [3, 5], [4, 5], [5, 5], [5, 4], [5, 3], [4, 3], [3, 3]]],
+    ]
+    for (var i=0; i < coords_and_expected_neighbors.length; i++){
+        var coords = coords_and_expected_neighbors[i][0];
+        var expected_neighbors = coords_and_expected_neighbors[i][1].sort();
+        var neighbors = findneighbors(coords[0], coords[1], 10, 10).sort();
+        if (JSON.stringify(neighbors) != JSON.stringify(expected_neighbors)){
+            console.log(neighbors);
+            console.log(expected_neighbors);
+            console.log(`Neighbors of ${coords} incorrect`);
+        }
+    }
+
 
 }
 </script>
