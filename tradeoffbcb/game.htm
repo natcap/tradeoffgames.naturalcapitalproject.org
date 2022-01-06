@@ -511,6 +511,9 @@ function runtests(){
         console.log(document.calculator.grass.style.background);
         console.log("Grass background color changed when it shouldn't have");
     }
+    // reset the colors to base state.
+    document.calculator.campY3.style.background = "#FFFFFF";
+    document.calculator.grass.style.background = "#FFFFFF";
 
     console.log('Testing coordinate pair extraction');
     clean();
