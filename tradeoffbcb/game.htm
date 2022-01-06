@@ -48,162 +48,11 @@ function parse_development_type(dev_type){
 
 
 function getinput(){
-white();
-
-var hotels = [];
-var camps = [];
-var pa = [];
-
-var x = -1;
-var y = -1;
-
-x = parseInt(document.calculator.hotelX1.value);
-y = parseInt(document.calculator.hotelY1.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    hotels.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.hotelX1.style.background="#00FF00";
-       document.calculator.hotelY1.style.background="#00FF00";
-    }}
-
-x = parseInt(document.calculator.hotelX2.value);
-y = parseInt(document.calculator.hotelY2.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    hotels.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.hotelX2.style.background="#00FF00";
-       document.calculator.hotelY2.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.hotelX3.value);
-y = parseInt(document.calculator.hotelY3.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    hotels.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.hotelX3.style.background="#00FF00";
-       document.calculator.hotelY3.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.campX1.value);
-y = parseInt(document.calculator.campY1.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    camps.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.campX1.style.background="#00FF00";
-       document.calculator.campY1.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.campX2.value);
-y = parseInt(document.calculator.campY2.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    camps.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.campX2.style.background="#00FF00";
-       document.calculator.campY2.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.campX3.value);
-y = parseInt(document.calculator.campY3.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    camps.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.campX3.style.background="#00FF00";
-       document.calculator.campY3.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.campX4.value);
-y = parseInt(document.calculator.campY4.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    camps.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.campX4.style.background="#00FF00";
-       document.calculator.campY4.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.campX5.value);
-y = parseInt(document.calculator.campY5.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    camps.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.campX5.style.background="#00FF00";
-       document.calculator.campY5.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.protectedX1.value);
-y = parseInt(document.calculator.protectedY1.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    pa.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.protectedX1.style.background="#00FF00";
-       document.calculator.protectedY1.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.protectedX2.value);
-y = parseInt(document.calculator.protectedY2.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    pa.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.protectedX2.style.background="#00FF00";
-       document.calculator.protectedY2.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.protectedX3.value);
-y = parseInt(document.calculator.protectedY3.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    pa.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.protectedX3.style.background="#00FF00";
-       document.calculator.protectedY3.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.protectedX4.value);
-y = parseInt(document.calculator.protectedY4.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    pa.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.protectedX4.style.background="#00FF00";
-       document.calculator.protectedY4.style.background="#00FF00";
-    }
-}
-
-x = parseInt(document.calculator.protectedX5.value);
-y = parseInt(document.calculator.protectedY5.value);
-
-if (!isNaN(x) && !isNaN(y)){
-    pa.push([x,y])
-    if (document.calculator.color.checked == 1){
-       document.calculator.protectedX5.style.background="#00FF00";
-       document.calculator.protectedY5.style.background="#00FF00";
-    }
-}
-
-//var hotels = parse_development_type('hotel');
-//var camps = parse_development_type('camp');
-//var pa = parse_development_type('protected');
-
-score(hotels,camps,pa)
+    white();
+    var hotels = parse_development_type('hotel');
+    var camps = parse_development_type('camp');
+    var pa = parse_development_type('protected');
+    score(hotels,camps,pa)
 }
 
 
@@ -662,11 +511,9 @@ function runtests(){
         console.log(document.calculator.grass.style.background);
         console.log("Grass background color changed when it shouldn't have");
     }
-    // reset the colors to base state.
-    document.calculator.campY3.style.background = "#FFFFFF";
-    document.calculator.grass.style.background = "#FFFFFF";
 
     console.log('Testing coordinate pair extraction');
+    clean();
     var test_data = {
         'hotelX1': 1,
         'hotelY1': '',  // deliberately blank; both X1, Y1 should be skipped
@@ -698,6 +545,9 @@ function runtests(){
     if (JSON.stringify(protected_areas) != JSON.stringify(expected_pa)){
         console.log('PA output does not match');
     }
+
+    console.log('Testing score');
+    clean();
 
 }
 </script>
