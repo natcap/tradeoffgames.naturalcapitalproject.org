@@ -37,16 +37,6 @@ function parse_development_type(dev_type){
     return coord_pairs;
 }
 
-
-function getinput(){
-    white();
-    var hotels = parse_development_type('hotel');
-    var camps = parse_development_type('camp');
-    var pa = parse_development_type('protected');
-    score(hotels,camps,pa)
-}
-
-
 function findneighbors(x, y, xDim, yDim)
 {
     // Neighbors are assumed to have the following order:
@@ -69,6 +59,31 @@ function findneighbors(x, y, xDim, yDim)
         }
     }
     return neighbors;
+}
+
+function make_coord_mask_from_red_zones(development_sites, row_dims, col_dims, pa){
+    var red_zone_mask = new Set();
+    for (var index = 0; index < development_sites.length; index++){
+        var coord_pair = development_sites[index];
+        red_zone_mask.add(coord_pair);
+        var dev_row = coord_pair[0];
+        var dev_col = coord_pair[1];
+
+        var neighbors = findneighbors(dev_row, dev_col, row_dims, col_dims);
+        for (var neighbor_index = 0; neighbor_index < neighbors.length; neighbor_index++){
+            red_zone_mask.add(neighbors[neighbor_index]);
+        }
+    }
+
+    // Protected areas are not allowed within the redzones, so if any were
+    // added to the red_zone_mask, we remove them.
+    for (var index = 0; index < pa.length; index++){
+        if (red_zone_mask.has(pa[index])){
+            red_zone_mask.delete(pa[index]);
+        }
+    }
+
+    return red_zone_mask;
 }
 
 function parse_sparse_gameboard_data(){
@@ -112,282 +127,94 @@ function parse_sparse_gameboard_data(){
     return dest_array;
 }
 
-
-function score(hotels, camps, pa)
-{
-
-var scores = {
-    tourism: 25,
-    fishing: 25,
-    coral_per_km2: 1,
-    mangroves_per_km2: 3,
-    seagrass_per_km2: 1,
-    vulnerability: 50,
+function new_get_inputs(){
+    var hotels = parse_development_type('hotel');
+    var camps = parse_development_type('camp');
+    var pa = parse_development_type('protected');
+    new_score(hotels, camps, pa);
 }
 
-var data = parse_sparse_gameboard_data();
+function new_score(hotels, camps, pa){
+    var scores = {
+        tourism: 25,
+        fishing: 25,
+        coral_per_km2: 1,
+        mangroves_per_km2: 3,
+        seagrass_per_km2: 1,
+        vulnerability: 50,
+    }
 
-var visited = [];
-var fished = [];
+    var data = parse_sparse_gameboard_data();
 
-// Protected areas must be excluded from hotel and fisheries scores.
-for (var n = 0; n < pa.length; n++){
-    visited.push([pa[n][0],pa[n][1]]);
-    fished.push([pa[n][0],pa[n][1]]);
+    // Make mask with hotels, tally scores.
+    var row_dims = 39;
+    var col_dims = 38;
+
+    // Totals for individual types of scores
+    var total_tourism_score = 0;
+    var total_fishing_score = 0;
+    var total_coral_score = 0;
+    var total_mangroves_score = 0;
+    var total_seagrass_score = 0;
+
+    var total_hotel_score = 0;
+    var hotel_mask_set = make_coord_mask_from_red_zones(hotels, row_dims, col_dims, pa);
+    for (var coords of hotel_mask_set){
+        var row = coords[0];
+        var col = coords[1];
+
+        var tourism_rank = data[row][col][0];
+        var coral_area_km2 = data[row][col][2];
+        var mangroves_area_km2 = data[row][col][3];
+        var seagrass_area_km2 = data[row][col][4];
+
+        total_hotel_score = total_hotel_score +
+            tourism_rank * scores.tourism +
+            coral_area_km2 * scores.coral_per_km2 +
+            mangroves_area_km2 * scores.mangroves_per_km2 +
+            seagrass_area_km2 * scores.seagrass_per_km2;
+    }
+
+    // Make mask with fish camps, tally scores.
+    var total_fish_score = 0;
+    var fish_camp_mask_set = make_coord_mask_from_red_zones(camps, row_dims, col_dims, pa);
+    for (var coords of fish_camp_mask_set){
+        var row = coords[0];
+        var col = coords[1];
+
+        var fishing_rank = data[row][col][1];
+        var coral_area_km2 = data[row][col][2];
+        var mangroves_area_km2 = data[row][col][3];
+        var seagrass_area_km2 = data[row][col][4];
+
+        // Tally up the scores for the fish camps
+        total_fish_score = total_fish_score +
+            fishing_rank * scores.fishing +
+            coral_area_km2 * scores.coral_per_km2 +
+            mangroves_area_km2 * scores.mangroves_per_km2 +
+            seagrass_area_km2 * scores.seagrass_per_km2;
+    }
+
+    // Use development sites and figure out impacts to CV
+    var cv_score = 0;
+    var development_sites = hotels.concat(camps);
+    for (var coords of development_sites){
+        var row = coords[0];
+        var col = coords[1];
+
+        // CV Rank will be 0 where we aren't on a shoreline SDU, so we can
+        // just skip those SDUs.
+        var cv_rank = data[row][col][5];
+        if (cv_rank > 0){
+            cv_score = cv_score + cv_rank * scores.vulnerability;
+        }
+    }
+
+    console.log('Hotel Score ' + total_hotel_score);
+    console.log('Fish Score ' + total_fish_score);
+    console.log('CV score ' + cv_score);
 }
-    var rowDim = 38;
-    var colDim = 39;
 
-    var row = -1;
-    var col = -1;
-
-    var tourTotal = 0;
-    var fishTotal = 0;
-    var coralTotal = 0;
-    var grovesTotal = 0;
-    var grassTotal = 0;
-
-    var tourLocal = 0;
-    var fishLocal = 0;
-    var coralLocal = 0;
-    var grovesLocal = 0;
-    var grassLocal = 0;
-
-    var tour = 0;
-    var fish = 0;
-    var coral = 0;
-    var groves = 0;
-    var grass = 0;
-
-    var visit = false;
-    var fishing = false;
-
-    var neighbors = [];
-
-    // For each user-defined hotel:
-    //
-    // Identify the set of distinct coordinate pairs affected by the set of hotels that are not MPAs
-    // For each coordinate pair affected by hotels, total up the scores for:
-    //    --> Tourism, coral, mangroves, seagrass
-    for (i=0; i<hotels.length; i++){
-        row = hotels[i][0];
-        col = hotels[i][1];
-
-
-        tour = data[row][col][0];
-        fish = 0;
-        coral = data[row][col][2];
-        groves = data[row][col][3];
-        grass = data[row][col][4];
-
-        visit = true;
-        for (v=0; v<visited.length; v++){
-             if ((row == visited[v][0]) && (col == visited[v][1])){
-                  visit = false;
-                  break;
-             }
-        }
-
-        // Don't double-count the points from another hotel.
-        if (visit){
-             tourTotal = tourTotal + tour;
-             fish = fishTotal + fish;
-             coralTotal = coralTotal + coral;
-             grovesTotal = grovesTotal + groves;
-             grassTotal = grassTotal + grass;
-
-             visited.push(hotels[i]);
-        }
-
-
-        neighbors = findneighbors(row, col, rowDim, colDim);
-        for (j=0; j<neighbors.length; j++){
-            visit = true;
-            for (v=0; v<visited.length; v++){
-                 if ((neighbors[j][0] == visited[v][0]) && (neighbors[j][1] == visited[v][1])){
-                      visit = false;
-                      break;
-                 }
-            }
-
-            if (visit){
-                 tourTotal = tourTotal + data[neighbors[j][0]][neighbors[j][1]][0];
-                 coralTotal = coralTotal + data[neighbors[j][0]][neighbors[j][1]][2];
-                 grovesTotal = grovesTotal + data[neighbors[j][0]][neighbors[j][1]][3];
-                 grassTotal = grassTotal + data[neighbors[j][0]][neighbors[j][1]][4];
-                 visited.push(neighbors[j]);
-            }
-
-            tour = tour + data[neighbors[j][0]][neighbors[j][1]][0];
-            coral = coral + data[neighbors[j][0]][neighbors[j][1]][2];
-            groves = groves + data[neighbors[j][0]][neighbors[j][1]][3];
-            grass = grass + data[neighbors[j][0]][neighbors[j][1]][4];
-        }
-    }
-
-    for (i=0; i<camps.length; i++){
-        visit = true;
-        for (v=0; v<visited.length; v++){
-             if ((camps[i][0] == visited[v][0]) && (camps[i][1] == visited[v][1])){
-                  visit = false;
-                  break;
-             }
-        }
-
-        if (visit){
-             fishTotal = fishTotal + data[camps[i][0]][camps[i][1]][1];
-             coralTotal = coralTotal + data[camps[i][0]][camps[i][1]][2];
-             grovesTotal = grovesTotal + data[camps[i][0]][camps[i][1]][3];
-             grassTotal = grassTotal + data[camps[i][0]][camps[i][1]][4];
-             visited.push(camps[i]);
-        }
-        else {
-            fishing = true;
-            for (f=0; f<fished.length; f++) {
-                 if ((camps[i][0] == fished[f][0]) && (camps[i][1] == fished[f][1])){
-                      fishing = false;
-                      break;
-                 }
-            }
-
-            if (fishing){
-                 fishTotal = fishTotal + data[camps[i][0]][camps[i][1]][1];
-                 fished.push(camps[i]);
-            }
-        }
-
-        //tour = data[camps[i][0]][camps[i][1]][0];
-        tour = 0;
-        fish = data[camps[i][0]][camps[i][1]][1];
-        coral = data[camps[i][0]][camps[i][1]][2];
-        groves = data[camps[i][0]][camps[i][1]][3];
-        grass = data[camps[i][0]][camps[i][1]][4];
-
-        neighbors = findneighbors(camps[i][0],camps[i][1], rowDim, colDim);
-        for (j=0; j<neighbors.length; j++){
-            visit = true;
-            for (v=0; v<visited.length; v++){
-                 if ((neighbors[j][0] == visited[v][0]) && (neighbors[j][1] == visited[v][1])){
-                      visit = false;
-                      //break;
-                 }
-            }
-
-            if (visit){
-                 fishTotal = fishTotal + data[neighbors[j][0]][neighbors[j][1]][1];
-                 coralTotal = coralTotal + data[neighbors[j][0]][neighbors[j][1]][2];
-                 grovesTotal = grovesTotal + data[neighbors[j][0]][neighbors[j][1]][3];
-                 grassTotal = grassTotal + data[neighbors[j][0]][neighbors[j][1]][4];
-                 visited.push(neighbors[j]);
-            }
-            else{
-                fishing = true;
-                for (f=0; f<fished.length; f++){
-                     if ((neighbors[j][0] == fished[f][0]) && (neighbors[j][1] == fished[f][1])){
-                          fishing = false;
-                          //break;
-                     }
-                }
-
-                if (fishing){
-                     fishTotal = fishTotal + data[neighbors[j][0]][neighbors[j][1]][1];
-                     fished.push(neighbors[j]);
-                }
-            }
-            tour = 0;
-            fish = fish + data[neighbors[j][0]][neighbors[j][1]][1];
-            coral = coral + data[neighbors[j][0]][neighbors[j][1]][2];
-            groves = groves + data[neighbors[j][0]][neighbors[j][1]][3];
-            grass = grass + data[neighbors[j][0]][neighbors[j][1]][4];
-        }
-    }
-
-    var coast = [[4,15],[5,15],[5,16],[6,16],[7,16],[8,15],[8,16],[9,15],[10,15],[11,15],[12,14],[13,14],[14,14],[15,13],[15,14],[16,13],[17,13],[18,12],[19,11],[19,12],[20,11],[21,10],[22,9],[22,10],[23,6],[23,7],[23,8],[23,9],[24,5],[25,5],[26,4],[26,5],[27,3],[28,2],[29,1],[30,1],[31,1]];
-    var cv1 = 0;
-    var cv2 = 0;
-    var loss = 0;
-    var impact = 0;
-    var totalImpact = 0;
-
-    var degraded = [];
-    var degrade = false;
-    for (n=0; n<hotels.length; n++){
-        degraded.push.apply(degraded,findneighbors(hotels[n][0],hotels[n][1],xDim,yDim));
-    }
-    degraded.push.apply(degraded,hotels);
-    for (n=0; n<camps.length; n++){
-        degraded.push.apply(degraded,findneighbors(camps[n][0],camps[n][1],xDim,yDim));
-    }
-    degraded.push.apply(degraded,camps);
-
-    for (n=0; (n<coast.length); n++){
-        cv1 = 0;
-        cv2 = 0;
-        neighbors = findneighbors(coast[n][0],coast[n][1],xDim,yDim);
-        neighbors.push(coast[n]);
-        for (j=0; j<neighbors.length; j++){
-            cv1 = cv1 + data[neighbors[j][0]][neighbors[j][1]][2] + data[neighbors[j][0]][neighbors[j][1]][3] + data[neighbors[j][0]][neighbors[j][1]][4];
-        }
-
-        for (j=0; j<neighbors.length; j++){
-            degrade = false;
-            for (d=0; !(degrade) && (d<degraded.length); d++){
-                if ((degraded[d][0] == neighbors[j][0]) && (degraded[d][1] == neighbors[j][1])){
-                    degrade = true;
-                    for (p=0; p<pa.length; p++){
-                        if ((degraded[d][0] == pa[p][0]) && (degraded[d][1] == pa[p][1])){
-                            degrade = false;
-                        }
-                    }
-                }
-            }
-
-            if (!degrade){
-                cv2 = cv2 + data[neighbors[j][0]][neighbors[j][1]][2] + data[neighbors[j][0]][neighbors[j][1]][3] + data[neighbors[j][0]][neighbors[j][1]][4];
-            }
-        }
-
-        loss = (cv1-cv2)/cv1;
-
-        if (data[coast[n][0]][coast[n][1]][5]==3){
-            impact = 0;
-        }
-        else if (data[coast[n][0]][coast[n][1]][5]==2){
-            if (loss > .6){
-                impact = 100;
-            }
-            else if (loss > .3){
-                impact = 50;
-            }
-            else {
-                impact = 0;
-            }
-        }
-        else {
-            if (loss > .6){
-                impact = 150;
-            }
-            else if (loss > .3){
-                impact = 100;
-            }
-            else {
-                impact = 0;
-            }
-        }
-
-        totalImpact = totalImpact + impact;
-    }
-
-document.calculator.cv.value=Math.round(totalImpact);
-document.calculator.fish.value=Math.round(fishTotal);
-document.calculator.tour.value=Math.round(tourTotal);
-document.calculator.gain.value=Math.round(fishTotal)+Math.round(tourTotal);
-document.calculator.coral.value=Math.round(coralTotal);
-document.calculator.groves.value=Math.round(grovesTotal);
-document.calculator.grass.value=Math.round(grassTotal);
-document.calculator.loss.value=Math.round(coralTotal)+Math.round(grovesTotal)+Math.round(grassTotal);
-document.calculator.score.value=(Math.round(tourTotal)+Math.round(fishTotal))-(Math.round(coralTotal)+Math.round(grovesTotal)+Math.round(grassTotal)+Math.round(totalImpact));
-}
 
 function example(){
 
@@ -432,6 +259,9 @@ document.calculator.loss.value="";
 document.calculator.score.value="";
 }
 
+</script>
+
+<script language="javascript" type="text/javascript">
 function white(){
     // We only want to set the background color on the top part of the table,
     // the one that the user provides the coordinate pairs.
@@ -449,9 +279,6 @@ function clean(){
     });
 }
 
-</script>
-
-<script language="javascript" type="text/javascript">
 function runtests(){
     console.log('Running tests');
 
@@ -620,7 +447,7 @@ function runtests(){
 <input type="hidden" name="color" value="true">
 <input type="button" value="Clear" onclick="javascript:clean();">
 <input type="button" value="Example" onclick="javascript:example();">
-<input type="button" value="Calculate" onclick="javascript:getinput();">
+<input type="button" value="Calculate" onclick="javascript:new_get_inputs();">
 </form>
 
 <div id="test-errors"></div>
