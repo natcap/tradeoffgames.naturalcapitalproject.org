@@ -7,31 +7,31 @@
 <title>Belize Game Score Calculator</title>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="./gameboard_data.js"></script>
+<script src="./gameboard_data/gameboard_data.js"></script>
 <script language="javascript" type="text/javascript">
 
-// dev_type MUST be BOTH the name prefix AND the table ID containing the x/y coord pairs of the development type.
-// The objective of this function is to return a list of valid x/y coordinate pairs, even if some cells are empty.
+// dev_type MUST be BOTH the name prefix AND the table ID containing the row/col coord pairs of the development type.
+// The objective of this function is to return a list of valid row/col coordinate pairs, even if some cells are empty.
 function parse_development_type(dev_type){
     var coord_pairs = [];
 
     // rows include the header row, which is a tr in this case
     var rows_in_table = $(`table#${dev_type} tr`).length;
     for (var i = 1; i < rows_in_table; i++){
-        x_elem = $(`input[name=${dev_type}X${i}]`);
-        y_elem = $(`input[name=${dev_type}Y${i}]`);
+        row_elem = $(`input[name=${dev_type}Row${i}]`);
+        col_elem = $(`input[name=${dev_type}Col${i}]`);
 
-        x_coord = parseInt(x_elem.val());
-        y_coord = parseInt(y_elem.val());
+        row_coord = parseInt(row_elem.val());
+        col_coord = parseInt(col_elem.val());
 
-        if (!isNaN(x_coord) && !isNaN(y_coord)){
-            coord_pairs.push([x_coord, y_coord]);
+        if (!isNaN(row_coord) && !isNaN(col_coord)){
+            coord_pairs.push([row_coord, col_coord]);
         }
 
         // only colorize the background if we're colorizing everything
         if ($('input[name=color]').prop('checked') === true){
-            x_elem.css('background-color', '#00FF00');
-            y_elem.css('background-color', '#00FF00');
+            row_elem.css('background-color', '#00FF00');
+            col_elem.css('background-color', '#00FF00');
         }
     }
     return coord_pairs;
@@ -73,11 +73,24 @@ function findneighbors(x, y, xDim, yDim)
 
 function parse_sparse_gameboard_data(){
     var dest_array = [];
-    for (var row = 0; row < 38; row++){
+    // Build up a dense matrix of the gameboard data
+    //
+    // The indices are in the order:
+    //    dest_array[row][column][attribute]
+    //
+    // Which is equivalent to saying:
+    //    dest_array[y][x][attribute]
+
+    // There are 39 rows in the gameboard.
+    for (var row = 0; row < 38; row ++){
         var row_data = [];
-        for (var col = 0; col < 39; col++){
+
+        // there are 38 columns in the gameboard
+        for (var column = 0; column < 39; column++){
             var sdu_values = [];
-            for(var value_index = 0; value_index < 7; value_index++){
+
+            // There are 6 attributes that need to be tracked for each cell.
+            for(var value_index = 0; value_index < 6; value_index++){
                 sdu_values.push(0);
             }
             row_data.push(sdu_values);
@@ -86,15 +99,15 @@ function parse_sparse_gameboard_data(){
     }
 
     for (var csv_row_index = 0; csv_row_index < gameboard_data.length; csv_row_index++){
-        var row = gameboard_data[csv_row_index];
-        var row_index = parseInt(row.row_index);
-        var col_index = parseInt(row.column_index);
-        dest_array[row_index][col_index][0] = parseInt(row.tourism_quality);
-        dest_array[row_index][col_index][1] = parseInt(row.fishing_quality);
-        dest_array[row_index][col_index][2] = parseFloat(row.coral_km2);
-        dest_array[row_index][col_index][3] = parseFloat(row.mangroves_km2);
-        dest_array[row_index][col_index][4] = parseFloat(row.seagrass_km2);
-        dest_array[row_index][col_index][5] = parseInt(row.cv_score);
+        var csv_row = gameboard_data[csv_row_index];
+        var row_index = parseInt(csv_row.row_index);
+        var col_index = parseInt(csv_row.column_index);
+        dest_array[row_index][col_index][0] = parseInt(csv_row.tourism_quality);
+        dest_array[row_index][col_index][1] = parseInt(csv_row.fishing_quality);
+        dest_array[row_index][col_index][2] = parseFloat(csv_row.coral_km2);
+        dest_array[row_index][col_index][3] = parseFloat(csv_row.mangroves_km2);
+        dest_array[row_index][col_index][4] = parseFloat(csv_row.seagrass_km2);
+        dest_array[row_index][col_index][5] = parseInt(csv_row.cv_score);
     }
     return dest_array;
 }
@@ -103,19 +116,30 @@ function parse_sparse_gameboard_data(){
 function score(hotels, camps, pa)
 {
 
+var scores = {
+    tourism: 25,
+    fishing: 25,
+    coral_per_km2: 1,
+    mangroves_per_km2: 3,
+    seagrass_per_km2: 1,
+    vulnerability: 50,
+}
+
 var data = parse_sparse_gameboard_data();
 
 var visited = [];
 var fished = [];
-for (n=0; n<pa.length; n++){
+
+// Protected areas must be excluded from hotel and fisheries scores.
+for (var n = 0; n < pa.length; n++){
     visited.push([pa[n][0],pa[n][1]]);
     fished.push([pa[n][0],pa[n][1]]);
 }
-    var xDim = 38;
-    var yDim = 39;
+    var rowDim = 38;
+    var colDim = 39;
 
-    var x = -1;
-    var y = -1;
+    var row = -1;
+    var col = -1;
 
     var tourTotal = 0;
     var fishTotal = 0;
@@ -142,20 +166,23 @@ for (n=0; n<pa.length; n++){
 
     // For each user-defined hotel:
     //
+    // Identify the set of distinct coordinate pairs affected by the set of hotels that are not MPAs
+    // For each coordinate pair affected by hotels, total up the scores for:
+    //    --> Tourism, coral, mangroves, seagrass
     for (i=0; i<hotels.length; i++){
-        x = hotels[i][0];
-        y = hotels[i][1];
+        row = hotels[i][0];
+        col = hotels[i][1];
 
 
-        tour = data[x][y][0];
+        tour = data[row][col][0];
         fish = 0;
-        coral = data[x][y][2];
-        groves = data[x][y][3];
-        grass = data[x][y][4];
+        coral = data[row][col][2];
+        groves = data[row][col][3];
+        grass = data[row][col][4];
 
         visit = true;
         for (v=0; v<visited.length; v++){
-             if ((x == visited[v][0]) && (y == visited[v][1])){
+             if ((row == visited[v][0]) && (col == visited[v][1])){
                   visit = false;
                   break;
              }
@@ -173,7 +200,7 @@ for (n=0; n<pa.length; n++){
         }
 
 
-        neighbors = findneighbors(x,y,xDim,yDim);
+        neighbors = findneighbors(row, col, rowDim, colDim);
         for (j=0; j<neighbors.length; j++){
             visit = true;
             for (v=0; v<visited.length; v++){
@@ -236,7 +263,7 @@ for (n=0; n<pa.length; n++){
         groves = data[camps[i][0]][camps[i][1]][3];
         grass = data[camps[i][0]][camps[i][1]][4];
 
-        neighbors = findneighbors(camps[i][0],camps[i][1],xDim,yDim);
+        neighbors = findneighbors(camps[i][0],camps[i][1], rowDim, colDim);
         for (j=0; j<neighbors.length; j++){
             visit = true;
             for (v=0; v<visited.length; v++){
@@ -440,32 +467,32 @@ function runtests(){
     });
 
     console.log('Testing white() function');
-    document.calculator.campY3.style.background = "#000000";  // Should be set to white
+    document.calculator.campCol3.style.background = "#000000";  // Should be set to white
     document.calculator.grass.style.background = "#000000";  // Should stay black
     white();
-    if ($('input[name=campY3]').css('background-color') != 'rgb(255, 255, 255)'){
-        console.log('CampY3 background not reset correctly');
+    if ($('input[name=campCol3]').css('background-color') != 'rgb(255, 255, 255)'){
+        console.log('CampCol3 background not reset correctly');
     }
     if ($('input[name=grass]').css('background-color') != 'rgb(0, 0, 0)'){
         console.log(document.calculator.grass.style.background);
         console.log("Grass background color changed when it shouldn't have");
     }
     // reset the colors to base state.
-    document.calculator.campY3.style.background = "#FFFFFF";
+    document.calculator.campCol3.style.background = "#FFFFFF";
     document.calculator.grass.style.background = "#FFFFFF";
 
     console.log('Testing coordinate pair extraction');
     clean();
     var test_data = {
-        'hotelX1': 1,
-        'hotelY1': '',  // deliberately blank; both X1, Y1 should be skipped
-        //deliberately excluding hotelX2, Y2.
-        'hotelX3': 4,
-        'hotelY3': 5,
-        'campX4': 6,
-        'campY4': 7,
-        'protectedX4': 4,
-        'protectedY4': 5,
+        'hotelRow1': 1,
+        'hotelCol1': '',  // deliberately blank; both Row1, Col1 should be skipped
+        //deliberately excluding hotelRow2, Col2.
+        'hotelRow3': 4,
+        'hotelCol3': 5,
+        'campRow4': 6,
+        'campCol4': 7,
+        'protectedRow4': 4,
+        'protectedCol4': 5,
     }
     for (const [key, value] of Object.entries(test_data)){
         $(`input[name=${key}]`).val(value);
@@ -533,32 +560,32 @@ function runtests(){
 
     <tr><td valign=top>
         <table id="hotel">
-        <tr><td>#</td><td><center>X</center></td><td><center>Y</center></td></tr>
-        <tr><td>1</td><td><input type="text" name="hotelX1" value="" size=2></td><td><input type="text" name="hotelY1" value="" size=2></td></tr>
-        <tr><td>2</td><td><input type="text" name="hotelX2" size=2></td><td><input type="text" name="hotelY2" size=2></td></tr>
-        <tr><td>3</td><td><input type="text" name="hotelX3" size=2></td><td><input type="text" name="hotelY3" size=2></td></tr>
+        <tr><td>#</td><td><center>Row</center></td><td><center>Column</center></td></tr>
+        <tr><td>1</td><td><input type="text" name="hotelRow1" value="" size=2></td><td><input type="text" name="hotelCol1" value="" size=2></td></tr>
+        <tr><td>2</td><td><input type="text" name="hotelRow2" size=2></td><td><input type="text" name="hotelCol2" size=2></td></tr>
+        <tr><td>3</td><td><input type="text" name="hotelRow3" size=2></td><td><input type="text" name="hotelCol3" size=2></td></tr>
         </table>
     </td>
 
     <td>
         <table id="camp">
-        <tr><td>#</td><td><center>X</center></td><td><center>Y</center></td></tr>
-        <tr><td>1</td><td><input type="text" name="campX1" size=2></td><td><input type="text" name="campY1" size=2></td></tr>
-        <tr><td>2</td><td><input type="text" name="campX2" size=2></td><td><input type="text" name="campY2" size=2></td></tr>
-        <tr><td>3</td><td><input type="text" name="campX3" size=2></td><td><input type="text" name="campY3" size=2></td></tr>
-        <tr><td>4</td><td><input type="text" name="campX4" size=2></td><td><input type="text" name="campY4" size=2></td></tr>
-        <tr><td>5</td><td><input type="text" name="campX5" size=2></td><td><input type="text" name="campY5" size=2></td></tr>
+        <tr><td>#</td><td><center>Row</center></td><td><center>Column</center></td></tr>
+        <tr><td>1</td><td><input type="text" name="campRow1" size=2></td><td><input type="text" name="campCol1" size=2></td></tr>
+        <tr><td>2</td><td><input type="text" name="campRow2" size=2></td><td><input type="text" name="campCol2" size=2></td></tr>
+        <tr><td>3</td><td><input type="text" name="campRow3" size=2></td><td><input type="text" name="campCol3" size=2></td></tr>
+        <tr><td>4</td><td><input type="text" name="campRow4" size=2></td><td><input type="text" name="campCol4" size=2></td></tr>
+        <tr><td>5</td><td><input type="text" name="campRow5" size=2></td><td><input type="text" name="campCol5" size=2></td></tr>
         </table>
     </td>
 
     <td>
         <table id="protected">
-        <tr><td>#</td><td><center>X</center></td><td><center>Y</center></td></tr>
-        <tr><td>1</td><td><input type="text" name="protectedX1" size=2></td><td><input type="text" name="protectedY1" size=2></td></tr>
-        <tr><td>2</td><td><input type="text" name="protectedX2" size=2></td><td><input type="text" name="protectedY2" size=2></td></tr>
-        <tr><td>3</td><td><input type="text" name="protectedX3" size=2></td><td><input type="text" name="protectedY3" size=2></td></tr>
-        <tr><td>4</td><td><input type="text" name="protectedX4" size=2></td><td><input type="text" name="protectedY4" size=2></td></tr>
-        <tr><td>5</td><td><input type="text" name="protectedX5" size=2></td><td><input type="text" name="protectedY5" size=2></td></tr>
+        <tr><td>#</td><td><center>Row</center></td><td><center>Column</center></td></tr>
+        <tr><td>1</td><td><input type="text" name="protectedRow1" size=2></td><td><input type="text" name="protectedCol1" size=2></td></tr>
+        <tr><td>2</td><td><input type="text" name="protectedRow2" size=2></td><td><input type="text" name="protectedCol2" size=2></td></tr>
+        <tr><td>3</td><td><input type="text" name="protectedRow3" size=2></td><td><input type="text" name="protectedCol3" size=2></td></tr>
+        <tr><td>4</td><td><input type="text" name="protectedRow4" size=2></td><td><input type="text" name="protectedCol4" size=2></td></tr>
+        <tr><td>5</td><td><input type="text" name="protectedRow5" size=2></td><td><input type="text" name="protectedCol5" size=2></td></tr>
         </table>
     </td></tr>
     </table>
