@@ -146,9 +146,8 @@ function new_score(hotels, camps, pa){
 
     var data = parse_sparse_gameboard_data();
 
-    // Make mask with hotels, tally scores.
-    var row_dims = 39;
-    var col_dims = 38;
+    var row_dims = data.length;
+    var col_dims = data[0].length;
 
     // Totals for individual types of scores
     var total_tourism_score = 0;
@@ -169,10 +168,10 @@ function new_score(hotels, camps, pa){
         var seagrass_area_km2 = data[row][col][4];
 
         total_hotel_score = total_hotel_score +
-            tourism_rank * scores.tourism +
-            coral_area_km2 * scores.coral_per_km2 +
-            mangroves_area_km2 * scores.mangroves_per_km2 +
-            seagrass_area_km2 * scores.seagrass_per_km2;
+            tourism_rank * scores.tourism -
+            (coral_area_km2 * scores.coral_per_km2 +
+             mangroves_area_km2 * scores.mangroves_per_km2 +
+             seagrass_area_km2 * scores.seagrass_per_km2);
     }
 
     // Make mask with fish camps, tally scores.
@@ -189,10 +188,10 @@ function new_score(hotels, camps, pa){
 
         // Tally up the scores for the fish camps
         total_fish_score = total_fish_score +
-            fishing_rank * scores.fishing +
-            coral_area_km2 * scores.coral_per_km2 +
-            mangroves_area_km2 * scores.mangroves_per_km2 +
-            seagrass_area_km2 * scores.seagrass_per_km2;
+            fishing_rank * scores.fishing -
+            (coral_area_km2 * scores.coral_per_km2 +
+             mangroves_area_km2 * scores.mangroves_per_km2 +
+             seagrass_area_km2 * scores.seagrass_per_km2);
     }
 
     // Use development sites and figure out impacts to CV
