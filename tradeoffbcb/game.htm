@@ -258,7 +258,7 @@ function new_score(hotels, camps, pa){
     console.log('Points lost from impacts to coastal vulnerability ' + cv_score);
     document.calculator.cv.value = cv_score;
 
-    var net_score = gains - losses;
+    var net_score = gains - losses - cv_score;
     console.log('Net Score ' + net_score);
     document.calculator.score.value = net_score;
 
@@ -478,7 +478,7 @@ function runtests(){
         [document.calculator.groves.value, 382],
         [document.calculator.grass.value, 812],
         [document.calculator.loss.value, 1292],
-        [document.calculator.score.value, 858],
+        [document.calculator.score.value, 608],
     ]
     for (var i = 0; i < values_and_expected_values.length; i++){
         var form_value = values_and_expected_values[i][0];
