@@ -62,28 +62,49 @@ function findneighbors(x, y, xDim, yDim)
 }
 
 function make_coord_mask_from_red_zones(development_sites, row_dims, col_dims, pa){
+    var max_dim = Math.max(row_dims, col_dims);
+
+    // It turns out that I can't just give a JS set an array, because I can add
+    // two arrays with the same values and the set will happily contain both.
+    // It must be tracking this by reference or something.  Integers,
+    // however, remain unique within the set, so we can convert the
+    // indices to a flat, integer index for this set computation and then
+    // convert it back later.
+    function _flat_index(coord_pair){
+        return coord_pair[0] * max_dim + coord_pair[1];
+    }
+
     var red_zone_mask = new Set();
     for (var index = 0; index < development_sites.length; index++){
         var coord_pair = development_sites[index];
-        red_zone_mask.add(coord_pair);
+        red_zone_mask.add(_flat_index(coord_pair));
         var dev_row = coord_pair[0];
         var dev_col = coord_pair[1];
 
         var neighbors = findneighbors(dev_row, dev_col, row_dims, col_dims);
         for (var neighbor_index = 0; neighbor_index < neighbors.length; neighbor_index++){
-            red_zone_mask.add(neighbors[neighbor_index]);
+            red_zone_mask.add(_flat_index(neighbors[neighbor_index]));
         }
     }
 
     // Protected areas are not allowed within the redzones, so if any were
     // added to the red_zone_mask, we remove them.
     for (var index = 0; index < pa.length; index++){
-        if (red_zone_mask.has(pa[index])){
-            red_zone_mask.delete(pa[index]);
+        var protected_area = _flat_index(pa[index]);
+        if (red_zone_mask.has(protected_area)){
+            red_zone_mask.delete(protected_area);
         }
     }
 
-    return red_zone_mask;
+    // Need to re-translate the flat indices back to row/col coordinate pairs.
+    var output_array = []
+    for (var iterator = red_zone_mask.values(), value=null; value=iterator.next().value; ) {
+        var row = Math.floor(value / max_dim);
+        var col = value % max_dim;
+        output_array.push([row, col]);
+    }
+
+    return output_array;
 }
 
 function parse_sparse_gameboard_data(){
@@ -167,15 +188,19 @@ function new_score(hotels, camps, pa){
         var mangroves_area_km2 = data[row][col][3];
         var seagrass_area_km2 = data[row][col][4];
 
-        total_hotel_score = total_hotel_score +
-            tourism_rank * scores.tourism -
+        total_hotel_score += tourism_rank * scores.tourism -
             (coral_area_km2 * scores.coral_per_km2 +
              mangroves_area_km2 * scores.mangroves_per_km2 +
              seagrass_area_km2 * scores.seagrass_per_km2);
+
+        total_tourism_score += tourism_rank * scores.tourism;
+        total_coral_score += coral_area_km2 * scores.coral_per_km2;
+        total_mangroves_score += mangroves_area_km2 * scores.mangroves_per_km2;
+        total_seagrass_score += seagrass_area_km2 * scores.seagrass_per_km2;
     }
 
     // Make mask with fish camps, tally scores.
-    var total_fish_score = 0;
+    var total_fish_camp_score = 0;
     var fish_camp_mask_set = make_coord_mask_from_red_zones(camps, row_dims, col_dims, pa);
     for (var coords of fish_camp_mask_set){
         var row = coords[0];
@@ -187,11 +212,15 @@ function new_score(hotels, camps, pa){
         var seagrass_area_km2 = data[row][col][4];
 
         // Tally up the scores for the fish camps
-        total_fish_score = total_fish_score +
-            fishing_rank * scores.fishing -
+        total_fish_camp_score += fishing_rank * scores.fishing -
             (coral_area_km2 * scores.coral_per_km2 +
              mangroves_area_km2 * scores.mangroves_per_km2 +
              seagrass_area_km2 * scores.seagrass_per_km2);
+
+        total_fishing_score += fishing_rank * scores.fishing;
+        total_coral_score += coral_area_km2 * scores.coral_per_km2;
+        total_mangroves_score += mangroves_area_km2 * scores.mangroves_per_km2;
+        total_seagrass_score += seagrass_area_km2 * scores.seagrass_per_km2;
     }
 
     // Use development sites and figure out impacts to CV
@@ -205,13 +234,41 @@ function new_score(hotels, camps, pa){
         // just skip those SDUs.
         var cv_rank = data[row][col][5];
         if (cv_rank > 0){
-            cv_score = cv_score + cv_rank * scores.vulnerability;
+            cv_score += cv_rank * scores.vulnerability;
         }
     }
 
+    console.log('---------');
+    console.log('TABULATED SCORES BY NATURAL CAPITAL');
+    console.log('Points gained from tourism ' + total_tourism_score);
+    console.log('Points gained from fishing ' + total_fishing_score);
+    document.calculator.tour.value = total_tourism_score;
+    document.calculator.fish.value = total_fishing_score;
+    var gains = total_tourism_score + total_fishing_score;
+    document.calculator.gain.value = gains;
+
+    console.log('Points lost from impacts to coral ' + total_coral_score);
+    console.log('Points lost from impacts to mangroves ' + total_mangroves_score);
+    console.log('Points lost from impacts to seagrass ' + total_seagrass_score);
+    document.calculator.coral.value = total_coral_score;
+    document.calculator.groves.value = total_mangroves_score;
+    document.calculator.grass.value = total_seagrass_score;
+    var losses = total_coral_score + total_mangroves_score + total_seagrass_score;
+    document.calculator.loss.value = losses;
+
+    console.log('Points lost from impacts to coastal vulnerability ' + cv_score);
+    document.calculator.cv.value = cv_score;
+
+    var net_score = gains - losses;
+    console.log('Net Score ' + net_score);
+    document.calculator.score.value = net_score;
+
+    console.log('---------');
+    console.log('TABULATED SCORES BY DEVELOPMENT TYPE');
     console.log('Hotel Score ' + total_hotel_score);
-    console.log('Fish Score ' + total_fish_score);
-    console.log('CV score ' + cv_score);
+    console.log('Fish Score ' + total_fish_camp_score);
+    console.log('CV impacts ' + cv_score);
+
 }
 
 
@@ -369,6 +426,39 @@ function runtests(){
         }
     }
 
+    console.log('Testing Sample Scenario');
+    clean();
+    // Feels nicer to do this in a loop rather than specifically call each input, even if it is longer.
+    //
+    // development type, row, column.
+    var inputs = [
+        ['hotel', 16, 13],
+        ['hotel', 19, 12],
+        ['camp', 23, 7],
+        ['camp', 11, 18],
+        ['camp', 17, 19],
+        ['protected', 17, 13],
+    ];
+    var n_developments = {
+        hotel: 1,
+        camp: 1
+
+    }
+    for (var input_index = 0; input_index < inputs.length; input_index++){
+        var development_type = inputs[input_index][0];
+        var row = inputs[input_index][1];
+        var col = inputs[input_index][2];
+
+        if (n_developments[development_type] === undefined){
+            n_developments[development_type] = 1;
+        }
+        var dev_index = n_developments[development_type];
+
+        $(`input[name=${development_type}Row${dev_index}]`).val(row);
+        $(`input[name=${development_type}Col${dev_index}]`).val(col);
+
+        n_developments[development_type] += 1;
+    }
 
 }
 </script>
