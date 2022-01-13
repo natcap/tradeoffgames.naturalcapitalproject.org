@@ -156,12 +156,18 @@ function new_get_inputs(){
 
 function new_score(hotels, camps, pa){
     var scores = {
-        tourism: 25,
-        fishing: 25,
-        coral_per_km2: 1,
-        mangroves_per_km2: 3,
-        seagrass_per_km2: 1,
-        vulnerability: 50,
+        //tourism: 25,
+        tourism: document.calculator.tourism_multiplier.value,
+        //fishing: 25,
+        fishing: document.calculator.fishing_multiplier.value,
+        //coral_per_km2: 1,
+        coral_per_km2: document.calculator.coral_multiplier.value,
+        //mangroves_per_km2: 3,
+        mangroves_per_km2: document.calculator.mangroves_multiplier.value,
+        //seagrass_per_km2: 1,
+        seagrass_per_km2: document.calculator.seagrass_multiplier.value,
+        //vulnerability: 50,
+        vulnerability: document.calculator.vulnerability_multiplier.value,
     }
 
     var data = parse_sparse_gameboard_data();
@@ -540,6 +546,31 @@ function runtests(){
     </td></tr>
     </table>
 </td></tr>
+
+<tr>
+    <td>
+        <table>
+            <tr>
+                <td>Tourism multiplier</td><td><input type="text" name="tourism_multiplier" size=4 value=25></td>
+            </tr>
+            <tr>
+                <td>Fishing multiplier</td><td><input type="text" name="fishing_multiplier" size=4 value=25></td>
+            </tr>
+            <tr>
+                <td>Coral multiplier (per km^2)</td><td><input type="text" name="coral_multiplier" size=4 value=1></td>
+            </tr>
+            <tr>
+                <td>Mangroves multiplier (per km^2)</td><td><input type="text" name="mangroves_multiplier" size=4 value=3></td>
+            </tr>
+            <tr>
+                <td>Seagrass multiplier (per km^2)</td><td><input type="text" name="seagrass_multiplier" size=4 value=1></td>
+            </tr>
+            <tr>
+                <td>Vulnerability multiplier</td><td><input type="text" name="vulnerability_multiplier" size=4 value=50></td>
+            </tr>
+        </table>
+    </td>
+</tr>
 
 <tr>
 <td>
