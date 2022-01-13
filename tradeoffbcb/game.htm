@@ -103,7 +103,6 @@ function make_coord_mask_from_red_zones(development_sites, row_dims, col_dims, p
         var col = value % max_dim;
         output_array.push([row, col]);
     }
-
     return output_array;
 }
 
@@ -240,20 +239,20 @@ function new_score(hotels, camps, pa){
 
     console.log('---------');
     console.log('TABULATED SCORES BY NATURAL CAPITAL');
-    console.log('Points gained from tourism ' + total_tourism_score);
-    console.log('Points gained from fishing ' + total_fishing_score);
-    document.calculator.tour.value = total_tourism_score;
-    document.calculator.fish.value = total_fishing_score;
-    var gains = total_tourism_score + total_fishing_score;
+    console.log('Points gained from tourism ' + Math.round(total_tourism_score));
+    console.log('Points gained from fishing ' + Math.round(total_fishing_score));
+    document.calculator.tour.value = Math.round(total_tourism_score);
+    document.calculator.fish.value = Math.round(total_fishing_score);
+    var gains = Math.round(total_tourism_score + total_fishing_score);
     document.calculator.gain.value = gains;
 
-    console.log('Points lost from impacts to coral ' + total_coral_score);
-    console.log('Points lost from impacts to mangroves ' + total_mangroves_score);
-    console.log('Points lost from impacts to seagrass ' + total_seagrass_score);
-    document.calculator.coral.value = total_coral_score;
-    document.calculator.groves.value = total_mangroves_score;
-    document.calculator.grass.value = total_seagrass_score;
-    var losses = total_coral_score + total_mangroves_score + total_seagrass_score;
+    console.log('Points lost from impacts to coral ' + Math.round(total_coral_score));
+    console.log('Points lost from impacts to mangroves ' + Math.round(total_mangroves_score));
+    console.log('Points lost from impacts to seagrass ' + Math.round(total_seagrass_score));
+    document.calculator.coral.value = Math.round(total_coral_score);
+    document.calculator.groves.value = Math.round(total_mangroves_score);
+    document.calculator.grass.value = Math.round(total_seagrass_score);
+    var losses = Math.round(total_coral_score + total_mangroves_score + total_seagrass_score);
     document.calculator.loss.value = losses;
 
     console.log('Points lost from impacts to coastal vulnerability ' + cv_score);
@@ -265,8 +264,8 @@ function new_score(hotels, camps, pa){
 
     console.log('---------');
     console.log('TABULATED SCORES BY DEVELOPMENT TYPE');
-    console.log('Hotel Score ' + total_hotel_score);
-    console.log('Fish Score ' + total_fish_camp_score);
+    console.log('Hotel Score ' + Math.round(total_hotel_score));
+    console.log('Fish Score ' + Math.round(total_fish_camp_score));
     console.log('CV impacts ' + cv_score);
 
 }
@@ -459,6 +458,7 @@ function runtests(){
 
         n_developments[development_type] += 1;
     }
+    clean();
 
 }
 </script>
