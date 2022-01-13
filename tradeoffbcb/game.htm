@@ -468,8 +468,31 @@ function runtests(){
 
         n_developments[development_type] += 1;
     }
-    clean();
+    new_get_inputs();
 
+    values_and_expected_values = [
+        [document.calculator.fish.value, 1100],
+        [document.calculator.tour.value, 1050],
+        [document.calculator.gain.value, 2150],
+        [document.calculator.coral.value, 99],
+        [document.calculator.groves.value, 382],
+        [document.calculator.grass.value, 812],
+        [document.calculator.loss.value, 1292],
+        [document.calculator.score.value, 858],
+    ]
+    for (var i = 0; i < values_and_expected_values.length; i++){
+        var form_value = values_and_expected_values[i][0];
+        var expected_value = values_and_expected_values[i][1];
+
+        if (form_value != expected_value){
+            console.log('Form value ' + form_value + ' != expected value ' + expected_value);
+        }
+    }
+
+
+
+
+    clean();
     console.log('Tests complete.')
 }
 </script>
@@ -544,6 +567,8 @@ function runtests(){
     </table>
 </td></tr>
 </table>
+
+<br/>
 <input type="hidden" name="color" value="true">
 <input type="button" value="Clear" onclick="javascript:clean();">
 <input type="button" value="Example" onclick="javascript:example();">
