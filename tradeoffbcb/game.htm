@@ -37,25 +37,25 @@ function parse_development_type(dev_type){
     return coord_pairs;
 }
 
-function findneighbors(x, y, xDim, yDim)
-{
+function findneighbors(row, col, rowDim, colDim){
     // Neighbors are assumed to have the following order:
     //
     // 3 2 1
     // 4 x 0
     // 5 6 7
-    var neighbor_offsets_x = [1, 1, 0, -1, -1, -1, 0, 1];
-    var neighbor_offsets_y = [0, 1, 1, 1, 0, -1, -1, -1];
+    var neighbor_offsets_row = [0, -1, -1, -1, 0, 1, 1, 1];
+    var neighbor_offsets_col = [1, 1, 0, -1, -1, -1, 0, 1];
+
 
     var neighbors = [];
     for (var neighbor=0; neighbor<8; neighbor++){
-        var neighbor_x = x + neighbor_offsets_x[neighbor];
-        var neighbor_y = y + neighbor_offsets_y[neighbor];
+        var neighbor_row = row + neighbor_offsets_row[neighbor];
+        var neighbor_col = col + neighbor_offsets_col[neighbor];
 
         // Only push the neighbor coordinate pair if it's within bounds.
-        if ((neighbor_x >= 0 && neighbor_x < xDim) &&
-            (neighbor_y >= 0 && neighbor_y < yDim)){
-            neighbors.push([neighbor_x, neighbor_y]);
+        if ((neighbor_row >= 0 && neighbor_row < rowDim) &&
+            (neighbor_col >= 0 && neighbor_col < colDim)){
+            neighbors.push([neighbor_row, neighbor_col]);
         }
     }
     return neighbors;
