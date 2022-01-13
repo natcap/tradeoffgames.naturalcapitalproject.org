@@ -275,34 +275,35 @@ function example(){
 
 clean();
 
-document.calculator.hotelX1.value=12;
-document.calculator.hotelY1.value=14;
-document.calculator.hotelX2.value=21;
-document.calculator.hotelY2.value=10;
-document.calculator.hotelX3.value=28;
-document.calculator.hotelY3.value=2;
+console.log('Loading example coordinates.');
+document.calculator.hotelRow1.value=12;
+document.calculator.hotelCol1.value=14;
+document.calculator.hotelRow2.value=21;
+document.calculator.hotelCol2.value=10;
+document.calculator.hotelRow3.value=28;
+document.calculator.hotelCol3.value=2;
 
-document.calculator.campX1.value=12;
-document.calculator.campY1.value=14;
-document.calculator.campX2.value=21;
-document.calculator.campY2.value=10;
-document.calculator.campX3.value=28;
-document.calculator.campY3.value=2;
-document.calculator.campX4.value=13;
-document.calculator.campY4.value=18;
-document.calculator.campX5.value=10;
-document.calculator.campY5.value=18;
+document.calculator.campRow1.value=12;
+document.calculator.campCol1.value=14;
+document.calculator.campRow2.value=21;
+document.calculator.campCol2.value=10;
+document.calculator.campRow3.value=28;
+document.calculator.campCol3.value=2;
+document.calculator.campRow4.value=13;
+document.calculator.campCol4.value=18;
+document.calculator.campRow5.value=10;
+document.calculator.campCol5.value=18;
 
-document.calculator.protectedX1.value=10;
-document.calculator.protectedY1.value=10;
-document.calculator.protectedX2.value=12;
-document.calculator.protectedY2.value=15;
-document.calculator.protectedX3.value="";
-document.calculator.protectedY3.value="";
-document.calculator.protectedX4.value="";
-document.calculator.protectedY4.value="";
-document.calculator.protectedX5.value="";
-document.calculator.protectedY5.value="";
+document.calculator.protectedRow1.value=10;
+document.calculator.protectedCol1.value=10;
+document.calculator.protectedRow2.value=12;
+document.calculator.protectedCol2.value=15;
+document.calculator.protectedRow3.value="";
+document.calculator.protectedCol3.value="";
+document.calculator.protectedRow4.value="";
+document.calculator.protectedCol4.value="";
+document.calculator.protectedRow5.value="";
+document.calculator.protectedCol5.value="";
 
 document.calculator.fish.value="";
 document.calculator.tour.value="";
@@ -460,6 +461,7 @@ function runtests(){
     }
     clean();
 
+    console.log('Tests complete.')
 }
 </script>
 
