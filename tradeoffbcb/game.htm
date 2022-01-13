@@ -330,8 +330,15 @@ function clean(){
     white();
 
     // Clear the text value for all text-based inputs in the DOM.
+    //
+    // If the element has a default value defined, reset to the default value.
     $('input[type=text]').each(function(){
-        $(this).val("");
+        var default_value = $(this).prop('defaultValue');
+        if (default_value !== undefined){
+            $(this).val(default_value);
+        } else {
+            $(this).val("");
+        }
     });
 }
 
@@ -344,8 +351,10 @@ function runtests(){
     });
     clean();
     $('input:text').each(function(){
-        if ($(this).val() != "") {
+        if ($(this).val() != "" && $(this).prop('defaultValue') === undefined) {
             console.log($(this).attr('name') + ' should be blank but is not.');
+        } else if ($(this).prop('defaultValue') !== $(this).val()){
+            console.log($(this).attr('name') + ' should match its default value but it does not.');
         }
     });
 
