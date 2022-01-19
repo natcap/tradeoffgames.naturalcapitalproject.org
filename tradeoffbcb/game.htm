@@ -158,19 +158,25 @@ function new_get_inputs(){
 }
 
 function new_score(hotels, camps, pa){
+    // Uncomment this block to re-enable using the user-defined point weights.
+    // var scores = {
+    //     tourism: document.calculator.tourism_multiplier.value,
+    //     fishing: document.calculator.fishing_multiplier.value,
+    //     coral_per_km2: document.calculator.coral_multiplier.value,
+    //     mangroves_per_km2: document.calculator.mangroves_multiplier.value,
+    //     seagrass_per_km2: document.calculator.seagrass_multiplier.value,
+    //     vulnerability: document.calculator.vulnerability_multiplier.value,
+    // }
+
+    // These point weights were defined by Jade and Jess when playing the game
+    // in 2022, when we revisited and redefined the rules of the game.
     var scores = {
-        //tourism: 25,
-        tourism: document.calculator.tourism_multiplier.value,
-        //fishing: 25,
-        fishing: document.calculator.fishing_multiplier.value,
-        //coral_per_km2: 1,
-        coral_per_km2: document.calculator.coral_multiplier.value,
-        //mangroves_per_km2: 3,
-        mangroves_per_km2: document.calculator.mangroves_multiplier.value,
-        //seagrass_per_km2: 1,
-        seagrass_per_km2: document.calculator.seagrass_multiplier.value,
-        //vulnerability: 50,
-        vulnerability: document.calculator.vulnerability_multiplier.value,
+        tourism: 25,
+        fishing: 25,
+        coral_per_km2: 1,
+        mangroves_per_km2: 3,
+        seagrass_per_km2: 1,
+        vulnerability: 50,
     }
 
     var data = parse_sparse_gameboard_data();
@@ -550,6 +556,7 @@ function runtests(){
     </table>
 </td></tr>
 
+<!--  Uncomment this table if you need to customize the score weights.
 <tr>
     <td>
         <table>
@@ -574,6 +581,7 @@ function runtests(){
         </table>
     </td>
 </tr>
+-->
 
 <tr>
 <td>
