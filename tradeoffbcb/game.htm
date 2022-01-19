@@ -10,6 +10,26 @@
 <script src="./gameboard_data/gameboard_data.js"></script>
 <script language="javascript" type="text/javascript">
 
+var NUM_ROWS = 38;  // There are 38 rows in the gameboard.
+var NUM_COLS = 39;  // There are 39 columns in the gameboard.
+var _MAX_DIM = Math.max(NUM_ROWS, NUM_COLS);
+
+// It turns out that I can't just give a JS set an array, because I can add
+// two arrays with the same values and the set will happily contain both.
+// It must be tracking this by reference or something.  Integers,
+// however, remain unique within the set, so we can convert the
+// indices to a flat, integer index for this set computation and then
+// convert it back later.
+function make_flat_index(coord_pair){
+    return coord_pair[0] * _MAX_DIM + coord_pair[1];
+}
+
+function revert_flat_index(flat_index){
+    var row = Math.floor(flat_index / _MAX_DIM);
+    var col = flat_index % _MAX_DIM;
+    return [row, col];
+}
+
 // dev_type MUST be BOTH the name prefix AND the table ID containing the row/col coord pairs of the development type.
 // The objective of this function is to return a list of valid row/col coordinate pairs, even if some cells are empty.
 function parse_development_type(dev_type){
@@ -61,39 +81,24 @@ function findneighbors(row, col, rowDim, colDim){
     return neighbors;
 }
 
-function make_coord_mask_from_red_zones(development_sites, row_dims, col_dims, pa){
-
-    // It turns out that I can't just give a JS set an array, because I can add
-    // two arrays with the same values and the set will happily contain both.
-    // It must be tracking this by reference or something.  Integers,
-    // however, remain unique within the set, so we can convert the
-    // indices to a flat, integer index for this set computation and then
-    // convert it back later.
-    //
-    // Need to use the largest dimension as the multiplication factor to avoid
-    // overflowing the column index.
-    var max_dim = Math.max(row_dims, col_dims);
-    function _flat_index(coord_pair){
-        return coord_pair[0] * max_dim + coord_pair[1];
-    }
-
+function make_coord_mask_from_red_zones(development_sites, pa){
     var red_zone_mask = new Set();
     for (var index = 0; index < development_sites.length; index++){
         var coord_pair = development_sites[index];
-        red_zone_mask.add(_flat_index(coord_pair));
+        red_zone_mask.add(make_flat_index(coord_pair));
         var dev_row = coord_pair[0];
         var dev_col = coord_pair[1];
 
-        var neighbors = findneighbors(dev_row, dev_col, row_dims, col_dims);
+        var neighbors = findneighbors(dev_row, dev_col, NUM_ROWS, NUM_COLS);
         for (var neighbor_index = 0; neighbor_index < neighbors.length; neighbor_index++){
-            red_zone_mask.add(_flat_index(neighbors[neighbor_index]));
+            red_zone_mask.add(make_flat_index(neighbors[neighbor_index]));
         }
     }
 
     // Protected areas are not allowed within the redzones, so if any were
     // added to the red_zone_mask, we remove them.
     for (var index = 0; index < pa.length; index++){
-        var protected_area = _flat_index(pa[index]);
+        var protected_area = make_flat_index(pa[index]);
         if (red_zone_mask.has(protected_area)){
             red_zone_mask.delete(protected_area);
         }
@@ -102,9 +107,7 @@ function make_coord_mask_from_red_zones(development_sites, row_dims, col_dims, p
     // Need to re-translate the flat indices back to row/col coordinate pairs.
     var output_array = []
     for (var iterator = red_zone_mask.values(), value=null; value=iterator.next().value; ) {
-        var row = Math.floor(value / max_dim);
-        var col = value % max_dim;
-        output_array.push([row, col]);
+        output_array.push(revert_flat_index(value));
     }
     return output_array;
 }
@@ -119,12 +122,10 @@ function parse_sparse_gameboard_data(){
     // Which is equivalent to saying:
     //    dest_array[y][x][attribute]
 
-    // There are 39 rows in the gameboard.
-    for (var row = 0; row < 38; row ++){
+    for (var row = 0; row < NUM_ROWS; row ++){
         var row_data = [];
 
-        // there are 38 columns in the gameboard
-        for (var column = 0; column < 39; column++){
+        for (var column = 0; column < NUM_ROWS; column++){
             var sdu_values = [];
 
             // There are 6 attributes that need to be tracked for each cell.
@@ -181,9 +182,6 @@ function new_score(hotels, camps, pa){
 
     var data = parse_sparse_gameboard_data();
 
-    var row_dims = data.length;
-    var col_dims = data[0].length;
-
     // Totals for individual types of scores
     var total_tourism_score = 0;
     var total_fishing_score = 0;
@@ -192,7 +190,7 @@ function new_score(hotels, camps, pa){
     var total_seagrass_score = 0;
 
     var total_hotel_score = 0;
-    var hotel_mask_set = make_coord_mask_from_red_zones(hotels, row_dims, col_dims, pa);
+    var hotel_mask_set = make_coord_mask_from_red_zones(hotels, pa);
     for (var coords of hotel_mask_set){
         var row = coords[0];
         var col = coords[1];
@@ -215,7 +213,7 @@ function new_score(hotels, camps, pa){
 
     // Make mask with fish camps, tally scores.
     var total_fish_camp_score = 0;
-    var fish_camp_mask_set = make_coord_mask_from_red_zones(camps, row_dims, col_dims, pa);
+    var fish_camp_mask_set = make_coord_mask_from_red_zones(camps, pa);
     for (var coords of fish_camp_mask_set){
         var row = coords[0];
         var col = coords[1];
