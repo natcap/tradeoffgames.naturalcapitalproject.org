@@ -62,7 +62,6 @@ function findneighbors(row, col, rowDim, colDim){
 }
 
 function make_coord_mask_from_red_zones(development_sites, row_dims, col_dims, pa){
-    var max_dim = Math.max(row_dims, col_dims);
 
     // It turns out that I can't just give a JS set an array, because I can add
     // two arrays with the same values and the set will happily contain both.
@@ -70,6 +69,10 @@ function make_coord_mask_from_red_zones(development_sites, row_dims, col_dims, p
     // however, remain unique within the set, so we can convert the
     // indices to a flat, integer index for this set computation and then
     // convert it back later.
+    //
+    // Need to use the largest dimension as the multiplication factor to avoid
+    // overflowing the column index.
+    var max_dim = Math.max(row_dims, col_dims);
     function _flat_index(coord_pair){
         return coord_pair[0] * max_dim + coord_pair[1];
     }
